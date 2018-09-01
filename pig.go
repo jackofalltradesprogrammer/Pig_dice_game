@@ -35,7 +35,15 @@ func stay(s score) (score bool) {
 // A strategy chooses an action for any given score
 type strategy func(score) action
 
-
+// stayAtK returns a strategy that rolls unitl thisTurn is at least k, then stays.
+func stayAtK(k int) strategy {
+	return func(s score) action {
+		if s.thisTurn >= k {
+			return stay
+		}
+		return roll
+	}
+}
 
 function main() {
 
