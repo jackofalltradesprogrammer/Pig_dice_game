@@ -1,7 +1,10 @@
 // Copyright 2011 the Go Authors. All rights reserved.
 package main
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 const (
 	win            = 100 // The winning score in a game of Pig
@@ -82,11 +85,34 @@ func roundRobin(strategies []strategy) ([]int, int) {
 	return wins, gamesPerStrategy
 }
 
+// ratioString takes a list of integer values and returns a string that lists
+// each value and its percentage of the sum of all values.
+// e.g., ratios(1, 2, 3) = "1/6 (16.7%), 2/6 (33.3%), 3/6 (50.0%)"
+func ratioString(vals ...int) string {
+	total := 0
+	for _, val := range vals {
+		total += val
+	}
+	s := ""
+	for _, val := range vals {
+		if s != "" {
+			s += ", "
+		}
+		pct := 100 * float64(val) / float64(total)
+		s += fmt.Sprintf("%d/%d (%0.1f%%)", val, total, pct)
+	}
+	return s
+}
+
 func main() {
 	strategies := make([]strategy, win)
 	for k := range strategies {
 		strategies[k] = stayAtK(k + 1)
 	}
 	wins, games := roundRobin(strategies)
-	print(wins, games)
+
+	for k := range strategies {
+		fmt.Printf("Wins, losses staying at k =% 4d: %s\n",
+			k+1, ratioString(wins[k], games-wins[k]))
+	}
 }
