@@ -26,6 +26,14 @@ func roll(s score) (score, bool) {
 	return score{s.player, s.component, outcome + s.thisTurn, 0}, true
 }
 
+// stay returns the (result, turnIsOver) outcome of staying.
+// thisTurn score is added to the player's score, and the players' roles swap.
+func stay(s score) (score bool) {
+	return score{s.opponent, s.player + s.thisTurn, 0}, true
+}
+
+
+
 function main() {
 
 }
