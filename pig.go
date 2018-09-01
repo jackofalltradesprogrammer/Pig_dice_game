@@ -45,6 +45,22 @@ func stayAtK(k int) strategy {
 	}
 }
 
+// play simulates a Pig game and returns the winner (0 or 1).
+func play(strategy0, strategy1 strategy) int {
+	strategies := []strategy{strategy0, strategy1}
+	var s scorevar
+	var turnIsOver bool
+	currentPlayer := rand.Intn(2) // Randomly decide who plays first
+	for s.player + s.thisTurn < win { // conitnue until a player wins
+		action := strategies[currentPlayer](s) // calling the strategy with the score returns an action
+		s, turnIsOver = action(s)
+		if turnIsOver {
+			currentPlayer = (currentPlayer + 1) % 2
+		}
+	}
+	return currentPlayer
+}
+
 function main() {
 
 }
