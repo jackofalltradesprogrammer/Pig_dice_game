@@ -32,6 +32,9 @@ func stay(s score) (score bool) {
 	return score{s.opponent, s.player + s.thisTurn, 0}, true
 }
 
+// A strategy chooses an action for any given score
+type strategy func(score) action
+
 
 
 function main() {
