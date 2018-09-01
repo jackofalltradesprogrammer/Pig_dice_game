@@ -1,9 +1,11 @@
 // Copyright 2011 the Go Authors. All rights reserved.
 package main
 
+import "math/rand"
+
 const (
-	win					= 100 // The winning score in a game of Pig
-	gamesPerSeries		= 10 // The number of games per seriest to simulate
+	win            = 100 // The winning score in a game of Pig
+	gamesPerSeries = 10  // The number of games per seriest to simulate
 )
 
 // A score includes scores accumulated in previous turns for each player,
@@ -16,19 +18,19 @@ type score struct {
 type action func(current score) (result score, turnIsOver bool)
 
 // roll returns the (result, turnIsOver) outcome of simulating a die roll.
-// If the roll value is 1, then this Turn score is abandone, and the player's 
+// If the roll value is 1, then this Turn score is abandone, and the player's
 // roles swap. Otherwise, the roll value is added to thisTurn.
 func roll(s score) (score, bool) {
 	outcome := rand.Intn(6) + 1 // A random int in [1, 6]
 	if outcome == 1 {
 		return score{s.opponent, s.player, 0}, true
 	}
-	return score{s.player, s.component, outcome + s.thisTurn, 0}, true
+	return score{s.player, s.opponent, outcome + s.thisTurn}, false
 }
 
 // stay returns the (result, turnIsOver) outcome of staying.
 // thisTurn score is added to the player's score, and the players' roles swap.
-func stay(s score) (score bool) {
+func stay(s score) (score, bool) {
 	return score{s.opponent, s.player + s.thisTurn, 0}, true
 }
 
@@ -48,10 +50,10 @@ func stayAtK(k int) strategy {
 // play simulates a Pig game and returns the winner (0 or 1).
 func play(strategy0, strategy1 strategy) int {
 	strategies := []strategy{strategy0, strategy1}
-	var s scorevar
+	var s score
 	var turnIsOver bool
-	currentPlayer := rand.Intn(2) // Randomly decide who plays first
-	for s.player + s.thisTurn < win { // conitnue until a player wins
+	currentPlayer := rand.Intn(2)   // Randomly decide who plays first
+	for s.player+s.thisTurn < win { // conitnue until a player wins
 		action := strategies[currentPlayer](s) // calling the strategy with the score returns an action
 		s, turnIsOver = action(s)
 		if turnIsOver {
@@ -65,8 +67,8 @@ func play(strategy0, strategy1 strategy) int {
 func roundRobin(strategies []strategy) ([]int, int) {
 	wins := make([]int, len(strategies))
 	for i := 0; i < len(strategies); i++ {
-		for j:= i + 1; j < len(strategies); j++ {
-			for k := 0; k < gamesPerSeries; K++ {
+		for j := i + 1; j < len(strategies); j++ {
+			for k := 0; k < gamesPerSeries; k++ {
 				winner := play(strategies[i], strategies[j])
 				if winner == 0 {
 					wins[i]++
@@ -76,10 +78,15 @@ func roundRobin(strategies []strategy) ([]int, int) {
 			}
 		}
 	}
-	gamesPerStrategy := gamesPerSeries * (len(strategies)-1) // no self play
+	gamesPerStrategy := gamesPerSeries * (len(strategies) - 1) // no self play
 	return wins, gamesPerStrategy
 }
 
-function main() {
-
+func main() {
+	strategies := make([]strategy, win)
+	for k := range strategies {
+		strategies[k] = stayAtK(k + 1)
+	}
+	wins, games := roundRobin(strategies)
+	print(wins, games)
 }
